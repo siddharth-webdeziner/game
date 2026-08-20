@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wonderland Arcade for Kids 🎈🐾⭐</title>
+  <style>
+    :root {
+      --primary: #ff6b6b;
+      --secondary: #4ecdc4;
+      --accent: #ffe66d;
+      --bg: #f7fff7;
+      --text: #2f3e46;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Fredoka', cursive, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      color: var(--text);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      color: #ff4757;
+      text-shadow: 2px 2px #ffffff;
+    }
+
+    .nav-bar {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .nav-btn {
+      padding: 12px 24px;
+      border: 3px solid #fff;
+      border-radius: 50px;
+      background: #fff;
+      color: #333;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+    }
+
+    .nav-btn.active {
+      background: #ff4757;
+      color: #fff;
+    }
+
+    .game-container {
+      background: #ffffffdd;
+      backdrop-filter: blur(8px);
+      border-radius: 24px;
+      padding: 25px;
+      width: 100%;
+      max-width: 650px;
+      min-height: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .score-board {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #2ed573;
+      background: #fff;
+      padding: 6px 18px;
+      border-radius: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    /* Game 1: Balloon Pop */
+    #balloon-box {
+      width: 100%;
+      height: 320px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #87CEEB, #E0F6FF);
+      border: 3px dashed #70a1ff;
+    }
+
+    .target-cue {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .balloon {
+      position: absolute;
+      width: 55px;
+      height: 70px;
+      border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: inset -5px -5px 10px rgba(0,0,0,0.15);
+      animation: floatUp 4s linear forwards;
+    }
+
+    .balloon::after {
+      content: "▲";
+      position: absolute;
+      bottom: -8px;
+      font-size: 10px;
+      color: inherit;
+    }
+
+    @keyframes floatUp {
+      0% { bottom: -80px; }
+      100% { bottom: 330px; }
+    }
+
+    /* Game 2: Animal Memory Match */
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .card {
+      aspect-ratio: 1;
+      background: #ffa502;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      cursor: pointer;
+      transition: transform 0.3s;
+      border: 3px solid #fff;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .card.flipped {
+      background: #ffffff;
+      transform: rotateY(180deg);
+    }
+
+    .card.matched {
+      background: #7bed9f;
+      cursor: default;
+    }
+
+    /* Game 3: Star Math Quest */
+    .math-card {
+      text-align: center;
+      width: 100%;
+    }
+
+    .math-problem {
+      font-size: 3rem;
+      font-weight: 900;
+      color: #3742fa;
+      margin-bottom: 20px;
+    }
+
+    .math-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      width: 100%;
+      max-width: 350px;
+      margin: 0 auto;
+    }
+
+    .math-btn {
+      background: #70a1ff;
+      border: none;
+      color: white;
+      font-size: 1.8rem;
+      font-weight: bold;
+      padding: 15px;
+      border-radius: 16px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #1e90ff;
+      transition: transform 0.1s;
+    }
+
+    .math-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #1e90ff;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>✨ Wonderland Kids Arcade ✨</h1>
+    <p style="color: #57606f; font-weight: bold;">Choose a game to play!</p>
+  </header>
+
+  <div class="nav-bar">
+    <button class="nav-btn active" onclick="switchGame('balloons')">🎈 Balloon Pop</button>
+    <button class="nav-btn" onclick="switchGame('memory')">🐾 Animal Cards</button>
+    <button class="nav-btn" onclick="switchGame('math')">⭐ Star Math</button>
+  </div>
+
+  <div class="game-container" id="gameArea"></div>
+
+  <script>
+    const gameArea = document.getElementById('gameArea');
+    let currentGame = 'balloons';
+    let balloonInterval = null;
+    let balloonTargetColor = '';
+    let balloonScore = 0;
+    const colors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#9b59b6'];
+    const colorNames = {
+      '#ff4757': 'RED 🔴',
+      '#2ed573': 'GREEN 🟢',
+      '#1e90ff': 'BLUE 🔵',
+      '#ffa502': 'ORANGE 🟠',
+      '#9b59b6': 'PURPLE 🟣'
+    };
+
+    function playTone(freq, duration = 0.15) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+        osc.stop(ctx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function switchGame(game) {
+      currentGame = game;
+      document.querySelectorAll('.nav-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', 
+          (idx === 0 && game === 'balloons') || 
+          (idx === 1 && game === 'memory') || 
+          (idx === 2 && game === 'math')
+        );
+      });
+      clearInterval(balloonInterval);
+      if (game === 'balloons') initBalloonGame();
+      if (game === 'memory') initMemoryGame();
+      if (game === 'math') initMathGame();
+    }
+
+    /* ---------------- 1. BALLOON POP GAME ---------------- */
+    function initBalloonGame() {
+      balloonScore = 0;
+      pickNewTargetColor();
+
+      gameArea.innerHTML = `
+        <div class="score-board">Score: <span id="b-score">0</span> ⭐</div>
+        <div class="target-cue">Pop the <span id="b-target" style="color:${balloonTargetColor}">COLOR</span> balloon!</div>
+        <div id="balloon-box"></div>
+      `;
+      updateTargetDisplay();
+
+      balloonInterval = setInterval(spawnBalloon, 900);
+    }
+
+    function pickNewTargetColor() {
+      balloonTargetColor = colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    function updateTargetDisplay() {
+      const targetSpan = document.getElementById('b-target');
+      if (targetSpan) {
+        targetSpan.textContent = colorNames[balloonTargetColor];
+        targetSpan.style.color = balloonTargetColor;
+      }
+    }
+
+    function spawnBalloon() {
+      const box = document.getElementById('balloon-box');
+      if (!box) return;
+
+      const balloon = document.createElement('div');
+      balloon.className = 'balloon';
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      balloon.style.backgroundColor = color;
+      balloon.style.color = color;
+      balloon.style.left = Math.random() * (box.clientWidth - 60) + 'px';
+
+      balloon.onclick = () => {
+        if (color === balloonTargetColor) {
+          playTone(587.33); // D5 high happy tone
+          balloonScore += 10;
+          document.getElementById('b-score').textContent = balloonScore;
+          if (balloonScore % 30 === 0) {
+            pickNewTargetColor();
+            updateTargetDisplay();
+          }
+        } else {
+          playTone(220); // low boop
+        }
+        balloon.remove();
+      };
+
+      balloon.onanimationend = () => balloon.remove();
+      box.appendChild(balloon);
+    }
+
+    /* ---------------- 2. ANIMAL MEMORY GAME ---------------- */
+    const animals = ['🐶', '🐱', '🐰', '🦁', '🐼', '🐵'];
+    let flippedCards = [];
+    let matchedPairs = 0;
+
+    function initMemoryGame() {
+      matchedPairs = 0;
+      flippedCards = [];
+      const deck = [...animals, ...animals].sort(() => Math.random() - 0.5);
+
+      gameArea.innerHTML = `
+        <div class="score-board">Pairs Found: <span id="mem-score">0 / 6</span> 🎉</div>
+        <div class="memory-grid" id="grid"></div>
+      `;
+
+      const grid = document.getElementById('grid');
+      deck.forEach((animal, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.animal = animal;
+        card.dataset.index = index;
+        card.onclick = () => flipCard(card);
+        grid.appendChild(card);
+      });
+    }
+
+    function flipCard(card) {
+      if (flippedCards.length === 2 || card.classList.contains('flipped') || card.classList.contains('matched')) {
+        return;
+      }
+
+      card.classList.add('flipped');
+      card.textContent = card.dataset.animal;
+      flippedCards.push(card);
+
+      if (flippedCards.length === 2) {
+        if (flippedCards[0].dataset.animal === flippedCards[1].dataset.animal) {
+          playTone(523.25);
+          flippedCards[0].classList.add('matched');
+          flippedCards[1].classList.add('matched');
+          flippedCards = [];
+          matchedPairs++;
+          document.getElementById('mem-score').textContent = `${matchedPairs} / 6`;
+          if (matchedPairs === 6) {
+            setTimeout(() => alert('🌟 Great job! You found all the animal pairs! 🌟'), 300);
+          }
+        } else {
+          playTone(196);
+          setTimeout(() => {
+            flippedCards[0].classList.remove('flipped');
+            flippedCards[1].classList.remove('flipped');
+            flippedCards[0].textContent = '';
+            flippedCards[1].textContent = '';
+            flippedCards = [];
+          }, 800);
+        }
+      }
+    }
+
+    /* ---------------- 3. STAR MATH QUEST ---------------- */
+    let mathScore = 0;
+    let correctAnswer = 0;
+
+    function initMathGame() {
+      mathScore = 0;
+      gameArea.innerHTML = `
+        <div class="score-board">Stars: <span id="m-score">0</span> 🌟</div>
+        <div class="math-card">
+          <div class="math-problem" id="problem">? + ?</div>
+          <div class="math-options" id="options"></div>
+        </div>
+      `;
+      nextMathProblem();
+    }
+
+    function nextMathProblem() {
+      const num1 = Math.floor(Math.random() * 9) + 1;
+      const num2 = Math.floor(Math.random() * 9) + 1;
+      correctAnswer = num1 + num2;
+
+      document.getElementById('problem').textContent = `${num1} + ${num2} = ?`;
+
+      const options = new Set([correctAnswer]);
+      while (options.size < 4) {
+        options.add(Math.floor(Math.random() * 18) + 2);
+      }
+
+      const optionsArray = Array.from(options).sort(() => Math.random() - 0.5);
+      const optionsContainer = document.getElementById('options');
+      optionsContainer.innerHTML = '';
+
+      optionsArray.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'math-btn';
+        btn.textContent = opt;
+        btn.onclick = () => {
+          if (opt === correctAnswer) {
+            playTone(659.25);
+            mathScore += 1;
+            document.getElementById('m-score').textContent = mathScore;
+            nextMathProblem();
+          } else {
+            playTone(174.61);
+          }
+        };
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    // Start default game on load
+    initBalloonGame();
+  </script>
+</body>
+</html>
