@@ -261,6 +261,28 @@
       } catch (e) {}
     }
 
+    function playCelebration() {
+      // Play a celebratory ascending melody
+      playTone(523.25, 0.12);   // C5
+      setTimeout(() => playTone(659.25, 0.12), 140);  // E5
+      setTimeout(() => playTone(784, 0.12), 280);     // G5
+      setTimeout(() => playTone(1046.5, 0.25), 420);  // C6 - held longer
+    }
+
+    function playWowSound() {
+      try {
+        const audio = new Audio('sound/wow.mp3');
+        audio.play().catch(e => console.log('Audio play error:', e));
+      } catch (e) {}
+    }
+
+    function playWrongSound() {
+      try {
+        const audio = new Audio('sound/wrong.mp3');
+        audio.play().catch(e => console.log('Audio play error:', e));
+      } catch (e) {}
+    }
+
     function switchGame(game) {
       currentGame = game;
       document.querySelectorAll('.nav-btn').forEach((btn, idx) => {
@@ -316,7 +338,7 @@
 
       balloon.onclick = () => {
         if (color === balloonTargetColor) {
-          playTone(587.33); // D5 high happy tone
+          playWowSound();
           balloonScore += 10;
           document.getElementById('b-score').textContent = balloonScore;
           if (balloonScore % 30 === 0) {
@@ -324,7 +346,7 @@
             updateTargetDisplay();
           }
         } else {
-          playTone(220); // low boop
+          playWrongSound();
         }
         balloon.remove();
       };
@@ -370,7 +392,7 @@
 
       if (flippedCards.length === 2) {
         if (flippedCards[0].dataset.animal === flippedCards[1].dataset.animal) {
-          playTone(523.25);
+          playWowSound();
           flippedCards[0].classList.add('matched');
           flippedCards[1].classList.add('matched');
           flippedCards = [];
@@ -380,7 +402,7 @@
             setTimeout(() => alert('🌟 Great job! You found all the animal pairs! 🌟'), 300);
           }
         } else {
-          playTone(196);
+          playWrongSound();
           setTimeout(() => {
             flippedCards[0].classList.remove('flipped');
             flippedCards[1].classList.remove('flipped');
@@ -430,12 +452,12 @@
         btn.textContent = opt;
         btn.onclick = () => {
           if (opt === correctAnswer) {
-            playTone(659.25);
+            playWowSound();
             mathScore += 1;
             document.getElementById('m-score').textContent = mathScore;
             nextMathProblem();
           } else {
-            playTone(174.61);
+            playWrongSound();
           }
         };
         optionsContainer.appendChild(btn);
