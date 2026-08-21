@@ -583,6 +583,40 @@
       musicStartBtn.addEventListener('click', startMusicFromUserInteraction);
     }
 
+    // Pause music when the page is hidden/minimized and resume when visible again
+    (function() {
+      let musicWasPlaying = false;
+
+      function pauseIfHidden() {
+        if (document.hidden || document.visibilityState === 'hidden') {
+          try {
+            musicWasPlaying = !backgroundMusic.paused && !backgroundMusic.ended;
+            backgroundMusic.pause();
+          } catch (e) {}
+        }
+      }
+
+      function resumeIfVisible() {
+        if (!document.hidden && document.visibilityState === 'visible') {
+          try {
+            if (musicWasPlaying) backgroundMusic.play().catch(() => {});
+          } catch (e) {}
+        }
+      }
+
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) pauseIfHidden(); else resumeIfVisible();
+      });
+
+      // pagehide/pageshow for some mobile browsers / WebViews
+      window.addEventListener('pagehide', pauseIfHidden);
+      window.addEventListener('pageshow', resumeIfVisible);
+
+      // fallback for blur/focus
+      window.addEventListener('blur', pauseIfHidden);
+      window.addEventListener('focus', resumeIfVisible);
+    })();
+
     function switchGame(game) {
       currentGame = game;
       document.querySelectorAll('.nav-btn').forEach((btn, idx) => {
