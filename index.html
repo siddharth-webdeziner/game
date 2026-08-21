@@ -493,6 +493,17 @@
     const gameArea = document.getElementById('gameArea');
     const musicOverlay = document.getElementById('musicOverlay');
     const musicStartBtn = document.getElementById('musicStartBtn');
+    let musicStarted = false; // tracks whether music was started at least once
+
+    function updateMusicButtonText() {
+      if (!musicStartBtn) return;
+      // If music was started previously, show "Continue", otherwise prompt to start
+      if (musicStarted || backgroundMusic.currentTime > 0) {
+        musicStartBtn.textContent = 'Continue again ▶';
+      } else {
+        musicStartBtn.textContent = '▶ Start Game';
+      }
+    }
     const gameSelect = document.getElementById('gameSelect');
     let currentGame = 'balloons';
     let balloonInterval = null;
@@ -573,6 +584,8 @@
 
     function startMusicFromUserInteraction() {
       playBackgroundMusic();
+      musicStarted = true;
+      updateMusicButtonText();
       if (musicOverlay) {
         musicOverlay.style.display = 'none';
       }
@@ -582,6 +595,65 @@
     if (musicStartBtn) {
       musicStartBtn.addEventListener('click', startMusicFromUserInteraction);
     }
+
+    // Pause music when the page is hidden/minimized and resume when visible again
+    (function() {
+      let shouldResumeAfterVisible = false;
+      const musicOverlayEl = document.getElementById('musicOverlay');
+
+      function handleHidden() {
+        try {
+          shouldResumeAfterVisible = !backgroundMusic.paused && !backgroundMusic.ended;
+          backgroundMusic.pause();
+          // hide overlay while backgrounded
+          if (musicOverlayEl) musicOverlayEl.style.display = 'none';
+        } catch (e) {}
+      }
+
+      function handleVisible() {
+        try {
+          if (shouldResumeAfterVisible) {
+            backgroundMusic.play().catch(() => {
+              if (musicOverlayEl) {
+                updateMusicButtonText();
+                musicOverlayEl.style.display = 'flex';
+              }
+            });
+            if (musicOverlayEl) musicOverlayEl.style.display = 'none';
+          } else {
+            // If music isn't playing (not started or paused), show the start overlay so user can resume
+            if ((backgroundMusic.paused || backgroundMusic.currentTime === 0) && musicOverlayEl) {
+              updateMusicButtonText();
+              musicOverlayEl.style.display = 'flex';
+            }
+          }
+        } catch (e) {}
+        shouldResumeAfterVisible = false;
+      }
+
+      // Visibility API
+      document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') handleHidden(); else handleVisible();
+      });
+
+      // Some WebViews and older browsers use prefixed event
+      document.addEventListener('webkitvisibilitychange', function() {
+        if (document.visibilityState === 'hidden') handleHidden(); else handleVisible();
+      });
+
+      // pagehide/pageshow for mobile browsers / WebViews
+      window.addEventListener('pagehide', handleHidden);
+      window.addEventListener('pageshow', handleVisible);
+
+      // fallback for blur/focus (desktop/mobile hybrid)
+      window.addEventListener('blur', handleHidden);
+      window.addEventListener('focus', handleVisible);
+
+      // If the audio is explicitly paused by the user while visible, clear the resume flag
+      backgroundMusic.addEventListener('pause', function() {
+        if (!document.hidden && document.visibilityState === 'visible') shouldResumeAfterVisible = false;
+      });
+    })();
 
     function switchGame(game) {
       currentGame = game;
