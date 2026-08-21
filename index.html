@@ -215,6 +215,71 @@
       transform: translateY(4px);
       box-shadow: 0 1px 0 #1e90ff;
     }
+
+    /* Game 4: Alphabet Tracing */
+    #drawing-canvas {
+      border: 3px solid #70a1ff;
+      border-radius: 16px;
+      cursor: crosshair;
+      background: #ffffff;
+      display: block;
+      touch-action: none;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .alphabet-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .letter-btn {
+      width: 40px;
+      height: 40px;
+      border: 2px solid #fff;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    }
+
+    .letter-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .letter-btn.active {
+      border: 3px solid #000;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.2);
+    }
+
+    .canvas-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 15px;
+    }
+
+    .control-btn {
+      padding: 8px 16px;
+      background: #ff6b6b;
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    }
+
+    .control-btn:hover {
+      background: #ff5252;
+      transform: translateY(-2px);
+    }
   </style>
 </head>
 <body>
@@ -228,6 +293,7 @@
     <button class="nav-btn active" onclick="switchGame('balloons')">🎈 Balloon Pop</button>
     <button class="nav-btn" onclick="switchGame('memory')">🐾 Animal Cards</button>
     <button class="nav-btn" onclick="switchGame('math')">⭐ Star Math</button>
+    <button class="nav-btn" onclick="switchGame('alphabet')">✏️ ABC Trace</button>
   </div>
 
   <div class="game-container" id="gameArea"></div>
@@ -261,41 +327,21 @@
       } catch (e) {}
     }
 
-    function playCelebration() {
-      // Play a celebratory ascending melody
-      playTone(523.25, 0.12);   // C5
-      setTimeout(() => playTone(659.25, 0.12), 140);  // E5
-      setTimeout(() => playTone(784, 0.12), 280);     // G5
-      setTimeout(() => playTone(1046.5, 0.25), 420);  // C6 - held longer
-    }
-
-    function playWowSound() {
-      try {
-        const audio = new Audio('sound/wow.mp3');
-        audio.play().catch(e => console.log('Audio play error:', e));
-      } catch (e) {}
-    }
-
-    function playWrongSound() {
-      try {
-        const audio = new Audio('sound/wrong.mp3');
-        audio.play().catch(e => console.log('Audio play error:', e));
-      } catch (e) {}
-    }
-
     function switchGame(game) {
       currentGame = game;
       document.querySelectorAll('.nav-btn').forEach((btn, idx) => {
         btn.classList.toggle('active', 
           (idx === 0 && game === 'balloons') || 
           (idx === 1 && game === 'memory') || 
-          (idx === 2 && game === 'math')
+          (idx === 2 && game === 'math') ||
+          (idx === 3 && game === 'alphabet')
         );
       });
       clearInterval(balloonInterval);
       if (game === 'balloons') initBalloonGame();
       if (game === 'memory') initMemoryGame();
       if (game === 'math') initMathGame();
+      if (game === 'alphabet') initAlphabetGame();
     }
 
     /* ---------------- 1. BALLOON POP GAME ---------------- */
@@ -338,7 +384,7 @@
 
       balloon.onclick = () => {
         if (color === balloonTargetColor) {
-          playWowSound();
+          playTone(587.33); // D5 high happy tone
           balloonScore += 10;
           document.getElementById('b-score').textContent = balloonScore;
           if (balloonScore % 30 === 0) {
@@ -346,7 +392,7 @@
             updateTargetDisplay();
           }
         } else {
-          playWrongSound();
+          playTone(220); // low boop
         }
         balloon.remove();
       };
@@ -392,7 +438,7 @@
 
       if (flippedCards.length === 2) {
         if (flippedCards[0].dataset.animal === flippedCards[1].dataset.animal) {
-          playWowSound();
+          playTone(523.25);
           flippedCards[0].classList.add('matched');
           flippedCards[1].classList.add('matched');
           flippedCards = [];
@@ -402,7 +448,7 @@
             setTimeout(() => alert('🌟 Great job! You found all the animal pairs! 🌟'), 300);
           }
         } else {
-          playWrongSound();
+          playTone(196);
           setTimeout(() => {
             flippedCards[0].classList.remove('flipped');
             flippedCards[1].classList.remove('flipped');
@@ -452,16 +498,271 @@
         btn.textContent = opt;
         btn.onclick = () => {
           if (opt === correctAnswer) {
-            playWowSound();
+            playTone(659.25);
             mathScore += 1;
             document.getElementById('m-score').textContent = mathScore;
             nextMathProblem();
           } else {
-            playWrongSound();
+            playTone(174.61);
           }
         };
         optionsContainer.appendChild(btn);
       });
+    }
+
+    // Start default game on load
+    const alphabetColors = ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#9b59b6', '#ff6348', '#00d2d3', '#ffb348', '#ff7675', '#a29bfe', '#fd79a8', '#fdcb6e', '#6c5ce7', '#74b9ff', '#81ecec', '#55efc4', '#fab1a0', '#ff7675', '#fd79a8', '#fdcb6e', '#6c5ce7', '#74b9ff', '#81ecec', '#55efc4', '#fab1a0', '#ff7675'];
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    let currentLetterIndex = 0;
+    let isDrawing = false;
+    let drawingCanvas = null;
+    let ctx = null;
+    let isCompletionPlaying = false;
+
+    function initAlphabetGame() {
+      currentLetterIndex = 0;
+      gameArea.innerHTML = `
+        <div class="score-board">Letter: <span id="abc-letter">A</span> (1/26) 📝</div>
+        <canvas id="drawing-canvas" width="500" height="350"></canvas>
+        <div class="alphabet-controls">
+          <div style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;" id="letter-grid"></div>
+        </div>
+        <div class="canvas-controls">
+          <button class="control-btn" onclick="clearDrawing()">🗑️ Clear</button>
+          <button class="control-btn" onclick="nextLetter()">✓ Next Letter</button>
+        </div>
+      `;
+
+      drawingCanvas = document.getElementById('drawing-canvas');
+      ctx = drawingCanvas.getContext('2d');
+      
+      // Setup event listeners
+      drawingCanvas.addEventListener('mousedown', startDrawing);
+      drawingCanvas.addEventListener('mousemove', draw);
+      drawingCanvas.addEventListener('mouseup', stopDrawing);
+      drawingCanvas.addEventListener('mouseout', stopDrawing);
+      
+      // Touch events for mobile
+      drawingCanvas.addEventListener('touchstart', handleTouch);
+      drawingCanvas.addEventListener('touchmove', handleTouch);
+      drawingCanvas.addEventListener('touchend', stopDrawing);
+
+      renderLetterGrid();
+      drawDashedLetter(currentLetterIndex);
+    }
+
+    function renderLetterGrid() {
+      const grid = document.getElementById('letter-grid');
+      grid.innerHTML = '';
+      alphabet.forEach((letter, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'letter-btn';
+        btn.textContent = letter;
+        btn.style.backgroundColor = alphabetColors[idx];
+        btn.style.color = '#fff';
+        if (idx === currentLetterIndex) {
+          btn.classList.add('active');
+        }
+        btn.onclick = () => {
+          currentLetterIndex = idx;
+          renderLetterGrid();
+          clearDrawing();
+          drawDashedLetter(idx);
+          document.getElementById('abc-letter').textContent = letter;
+          document.getElementById('abc-letter').style.color = alphabetColors[idx];
+        };
+        grid.appendChild(btn);
+      });
+    }
+
+    function drawDashedLetter(index) {
+      // Clear canvas
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+
+      // Draw dashed outline and guide
+      const letter = alphabet[index];
+      const color = alphabetColors[index];
+
+      // Draw a light background grid
+      ctx.strokeStyle = 'rgba(200, 200, 200, 0.2)';
+      ctx.setLineDash([5, 5]);
+      ctx.lineWidth = 1;
+
+      // Draw dashed letter as guide
+      ctx.font = 'bold 180px Arial';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 4;
+      ctx.setLineDash([15, 10]);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.strokeText(letter, 250, 175);
+
+      // Draw light fill to show the letter shape
+      ctx.fillStyle = `${color}20`;
+      ctx.fillText(letter, 250, 175);
+
+      ctx.setLineDash([]);
+    }
+
+    function startDrawing(e) {
+      isDrawing = true;
+      const rect = drawingCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const color = alphabetColors[currentLetterIndex];
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+    }
+
+    function handleTouch(e) {
+      isDrawing = e.type !== 'touchend';
+      const touch = e.touches[0];
+      const rect = drawingCanvas.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+      
+      if (isDrawing) {
+        if (e.type === 'touchstart') {
+          const color = alphabetColors[currentLetterIndex];
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 6;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+          ctx.stroke();
+        }
+      } else if (e.type === 'touchend') {
+        checkLetterCompletion();
+      }
+      e.preventDefault();
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      
+      const rect = drawingCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+
+    function stopDrawing() {
+      isDrawing = false;
+      ctx.closePath();
+      checkLetterCompletion();
+    }
+
+    function clearDrawing() {
+      isCompletionPlaying = false;
+      drawDashedLetter(currentLetterIndex);
+    }
+
+    function checkLetterCompletion() {
+      if (isCompletionPlaying) return;
+
+      const imageData = ctx.getImageData(0, 0, drawingCanvas.width, drawingCanvas.height);
+      const data = imageData.data;
+      let drawnPixels = 0;
+      
+      // Count non-white pixels (drawn areas)
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+        
+        // Check if pixel is not white and has some opacity
+        if ((r < 240 || g < 240 || b < 240) && a > 50) {
+          drawnPixels++;
+        }
+      }
+      
+      const totalPixels = drawingCanvas.width * drawingCanvas.height;
+      const coverage = (drawnPixels / totalPixels) * 100;
+      
+      // If more than 15% of canvas is drawn, consider it complete
+      if (coverage > 15) {
+        isCompletionPlaying = true;
+        playCelebrationSound();
+        setTimeout(() => autoAdvanceLetter(), 1200);
+      }
+    }
+
+    function playCelebrationSound() {
+      // Play a series of ascending tones for celebration
+      const tones = [523.25, 587.33, 659.25, 783.99];
+      let toneIndex = 0;
+      
+      function playNextTone() {
+        if (toneIndex < tones.length) {
+          playTone(tones[toneIndex], 0.2);
+          toneIndex++;
+          setTimeout(playNextTone, 150);
+        }
+      }
+      
+      playNextTone();
+    }
+
+    function autoAdvanceLetter() {
+      if (currentLetterIndex < alphabet.length - 1) {
+        currentLetterIndex++;
+        renderLetterGrid();
+        clearDrawing();
+        drawDashedLetter(currentLetterIndex);
+        document.getElementById('abc-letter').textContent = alphabet[currentLetterIndex];
+        document.getElementById('abc-letter').style.color = alphabetColors[currentLetterIndex];
+        isCompletionPlaying = false;
+      } else {
+        playCelebrationSound();
+        setTimeout(() => {
+          alert('🌟✨ Fantastic! You traced all 26 letters! You\'re an alphabet master! ✨🌟');
+          currentLetterIndex = 0;
+          isCompletionPlaying = false;
+          renderLetterGrid();
+          clearDrawing();
+          drawDashedLetter(0);
+          document.getElementById('abc-letter').textContent = 'A';
+          document.getElementById('abc-letter').style.color = alphabetColors[0];
+        }, 1000);
+      }
+    }
+
+    function nextLetter() {
+      if (currentLetterIndex < alphabet.length - 1) {
+        currentLetterIndex++;
+        isCompletionPlaying = false;
+        renderLetterGrid();
+        clearDrawing();
+        drawDashedLetter(currentLetterIndex);
+        document.getElementById('abc-letter').textContent = alphabet[currentLetterIndex];
+        document.getElementById('abc-letter').style.color = alphabetColors[currentLetterIndex];
+        playTone(523.25); // Success sound
+      } else {
+        playCelebrationSound();
+        setTimeout(() => {
+          alert('🌟✨ Fantastic! You traced all 26 letters! You\'re an alphabet master! ✨🌟');
+          currentLetterIndex = 0;
+          isCompletionPlaying = false;
+          renderLetterGrid();
+          clearDrawing();
+          drawDashedLetter(0);
+          document.getElementById('abc-letter').textContent = 'A';
+          document.getElementById('abc-letter').style.color = alphabetColors[0];
+        }, 1000);
+      }
     }
 
     // Start default game on load
